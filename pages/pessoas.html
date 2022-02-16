@@ -1,0 +1,77 @@
+<h4>Lista de Alunos</h4>
+
+<div class="row">
+    <form class="col s12">
+        <div class="row">
+            <div class="input-field col s12">
+                <input placeholder="Nome" id="nome" type="text" class="validate">
+                <label class="active" for="nome">Nome</label>
+            </div>
+            <div class="input-field col s12">
+                <input placeholder="Idade" id="idade" type="text" class="validate">
+                <label class="active" for="idade">Idade</label>
+            </div>
+            <div class="input-field col s12">
+                <input placeholder="Curso" id="curso" type="text" class="validate">
+                <label class="active" for="curso">Curso</label>
+            </div>
+        </div>
+    </form>
+    <button id="enviarForm" class="btn waves-effect waves-light" type="submit" name="action">Submit
+        <i class="material-icons right">send</i>
+    </button>
+    <button id="enviarForm" onclick="listarDados()" class="btn waves-effect waves-light" type="submit" name="action">Listar Dados
+        <i class="material-icons right">send</i>
+    </button>
+</div>
+
+<ul id="pessoas" class="collection">
+
+</ul>
+
+<script>
+
+    function listarDados(){
+        $.getJSON('https://my-json-server.typicode.com/ositoflorneto/osito-server/alunos', function (data, status) {
+        let pessoas = []
+
+        for (let pessoa of data) {
+            pessoas.push(`
+            <li class="collection-item avatar">
+            <img src="../assets/images/perfil.jpeg" alt="" class="circle">
+            <span class="title">${pessoa.aluno}</span>
+            <p>${pessoa.idade || 'Não tem'} <br>
+             ${pessoa.curso || 'Não tem'}
+            </p>
+            <button onclick="getPessoas(${pessoa.id})" class="btn waves-effect waves-light secondary-content" type="submit" name="action">Editar
+            <i class="material-icons right">create</i>
+            </button>
+            </li>
+            `)
+        }
+
+        $('#pessoas').html(pessoas)
+
+    })
+    }
+
+   
+
+    function getPessoas(id) {
+        $.getJSON(`https://my-json-server.typicode.com/ositoflorneto/osito-server/${id}`, function (data, status) {
+            $("#nome").val(data.aluno)
+            $("#idade").val(data.idade)
+            $("#curso").val(data.curso)
+        })
+    }
+
+    $("#enviarForm").click(function () {
+        $.post("https://my-json-server.typicode.com/ositoflorneto/osito-server/alunos",
+            {
+                "aluno": $("#nome").val(),
+                "idade": $("#idade").val(),
+                "curso": $("#curso").val(),
+                "matricula": $("#matricula").val()
+            });
+    });
+</script>
