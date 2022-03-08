@@ -1,31 +1,42 @@
-<h4>Lista de Alunos</h4>
-
-<button onclick="addAluno()" id="btn-form" class="btn waves-effect waves-light" type="submit" name="action">Inserir novo
+<h4 id="titleCrud">Lista de alunos</h4>
+<button id="btnInserir" onclick="addAluno()" class="btn waves-effect waves-light" name="action">Inserir novo
     <i class="material-icons right">add</i>
 </button>
 
 <div hidden id="formCrud" class="row">
-    <form class="col s12">
+    <form id="formAlunos" class="col s12">
         <div class="row">
+            <div id="inputId" class="input-field col s12">
+                <input disabled placeholder="0" id="id" type="text">
+                <label class="active" for="id">Id</label>
+            </div>
             <div class="input-field col s12">
-                <input placeholder="Nome" id="nome" type="text" class="validate">
+                <input placeholder="Henning" required="" id="nome" name="nome" type="text" class="validate">
                 <label class="active" for="nome">Nome</label>
+                <span for="nome" class="helper-text"data-error="Campo obrigartorio" data-success=""></span>
             </div>
             <div class="input-field col s12">
-                <input placeholder="Idade" id="idade" type="text" class="validate">
-                <label class="active" for="idade">Idade</label>
-            </div>
-            <div class="input-field col s12">
-                <input placeholder="Curso" id="curso" type="text" class="validate">
+                <input placeholder="Frontend" required=""  id="curso" name="curso" type="text" class="validate">
                 <label class="active" for="curso">Curso</label>
+                <span for="curso" class="helper-text" data-error="Campo obrigartorio" data-success="right"></span>
+            </div>
+            <div class="input-field col s12">
+                <input placeholder="ds54455" required=""  id="matricula" name="matricula" type="text" class="validate">
+                <label class="active" for="matricula">Matricula</label>
+                <span class="helper-text" data-error="Campo obrigartorio" data-success="right"></span>
             </div>
         </div>
+        <button id="btnSalvar" onclick="salvarDados()" class="btn waves-effect waves-light" name="action">Salvar
+            <i class="material-icons right">send</i>
+        </button>
     </form>
-    <button id="enviarForm" class="btn waves-effect waves-light" type="submit" name="action">Salvar
+   
+    <button hidden id="btnAtualizar" onclick="atualizarDados()" class="btn waves-effect waves-light"
+        name="action">Atualizar
         <i class="material-icons right">send</i>
     </button>
-    <button onclick="cancelar()" class="btn waves-effect waves-light" type="submit" name="action">Cancelar
-        <i class="material-icons right">clear</i>
+    <button onclick="cancelar()" class="btn waves-effect waves-light" name="action">Cancelar
+        <i class="material-icons right">close</i>
     </button>
 </div>
 
@@ -35,61 +46,212 @@
 
 <script>
 
-    function listarDados(){
-        $.getJSON('https://server-osito-json.herokuapp.com/posts', function (data, status) {
-        let pessoas = []
+// Mostrar o formulário de inserção do aluno
+    function addAluno() {
+        $('#titleCrud').html('Inserir aluno');
+        $('#formCrud').show()
+        $('#pessoas').hide()
+        $('#inputId').hide()
+        $('#btnInserir').hide()
+        $('#btnSalvar').show()
+        $('#btnAtualizar').hide()
+        limparForm()
+    }
 
-        for (let pessoa of data) {
-            pessoas.push(`
-            <li class="collection-item avatar">
-            <img src="../assets/images/perfil.jpeg" alt="" class="circle">
-            <span class="title">${pessoa.aluno}</span>
-            <p>${pessoa.idade || 'Não tem'} <br>
-             ${pessoa.curso || 'Não tem'}
-            </p>
-            <button onclick="getPessoas(${pessoa.id})" class="btn waves-effect waves-light secondary-content" type="submit" name="action">Editar
-            <i class="material-icons right">create</i>
-            </button>
-            </li>
-            `)
+    // Limpar dados dos formulário
+    function limparForm() {
+        let inputs = $('input')
+        for (let index = 0; index < inputs.length; index++) {
+            inputs[index].value = ''
         }
 
-        $('#pessoas').html(pessoas)
-
-    })
+        // $('#nome').val('')
+        // $('#curso').val('')
+        // $('#matricula').val('')
     }
 
+    // Exibir formulário de edição do aluno
+    function putAluno() {
+        $('#btnInserir').hide()
+        $('#formCrud').show()
+        $('#pessoas').hide()
+        $('#btnSalvar').hide()
+        $('#btnAtualizar').show()
+    }
+
+    // Mostrar lista de alunos e ocultar formulário
+    function cancelar() {
+        $('#titleCrud').html('Listar alunos');
+        $('#formCrud').hide()
+        $('#pessoas').show()
+        $('#btnInserir').show()
+        $('#inputId').show()
+    }
+
+    // Carregar dados de todos os alunos
+    function listarDados() {
+        $.getJSON('https://api-server-senac.herokuapp.com/alunos', function (data, status) {
+            console.log(data)
+            let pessoas = []
+
+            for (let pessoa of data) {
+                pessoas.push(`
+            <li class="collection-item avatar">
+            <img src="../assets/images/perfil.jpeg" alt="" class="circle">
+            <span class="title">${pessoa.nome}</span>
+            <p>${pessoa.curso || 'Não tem'} <br>
+             ${pessoa.matricula || 'Não tem'}
+            </p>
+            <a href="#!" class="actionBtnView secondary-content"><i onclick="verId(${pessoa.id})" class="material-icons">remove_red_eye</i></a>
+            <a href="#!" class="actionBtnEdit secondary-content"><i onclick="pegarId(${pessoa.id})" class="material-icons">create</i></a>
+            <a href="#!" class="secondary-content"><i onclick="deletarAluno(${pessoa.id})" class="material-icons">delete_forever</i></a>
+            </li>
+            `)
+            }
+
+            $('#pessoas').html(pessoas)
+
+        })
+    }
+
+    // Carregar dados de um aluno no inicio da página
     listarDados()
 
-    function getPessoas(id) {
-        $.getJSON(`https://server-osito-json.herokuapp.com/posts/${id}`, function (data, status) {
-            $("#nome").val(data.aluno)
-            $("#idade").val(data.idade)
-            $("#curso").val(data.curso)
+    // Ver dados do aluno pelo id
+    function verId(id) {
+        $('#inputId').show()
+        $('#titleCrud').html('Visualizar aluno');
+
+        console.log('o id é', id)
+        $.getJSON(`https://api-server-senac.herokuapp.com/alunos/${id}`, function (data, status) {
+            console.log(data)
+            $('#id').val(data.id)
+            $('#nome').val(data.nome).attr('disabled', true)
+            $('#curso').val(data.curso).attr('disabled', true)
+            $('#matricula').val(data.matricula).attr('disabled', true)
+        })
+        putAluno()
+
+    }
+
+    // Pegar dados do aluno pelo id
+    function pegarId(id) {
+        $('#inputId').show()
+        $('#titleCrud').html('Atualizar aluno');
+
+        console.log('o id é', id)
+        $.getJSON(`https://api-server-senac.herokuapp.com/alunos/${id}`, function (data, status) {
+            console.log(data)
+            $('#id').val(data.id)
+            $('#nome').val(data.nome).attr('disabled', false)
+            $('#curso').val(data.curso).attr('disabled', false)
+            $('#matricula').val(data.matricula).attr('disabled', false)
+        })
+        putAluno()
+
+    }
+
+    // Salvar dados do aluno
+    function salvarDados() {
+
+        $.validator.setDefaults({
+            errorClass: 'invalid',
+            validClass: "valid",
+            errorPlacement: function (error, element) {
+                $(element)
+                    .closest("form")
+                    .find("span[for='" + element.attr("id") + "']")
+                    .attr('data-error', error.text());
+            },
+            submitHandler: function (form) {
+
+                console.log('form ok');
+            }
+        });
+
+        $('#formAlunos').validate({
+            rules: {
+                nome : {
+                    required: true,
+                    minlength: 10
+                },
+
+                curso : {
+                    required: true,
+                    rangelength: [4, 15]
+                }
+
+            },
+            messages: {
+                nome: {
+                    required: "O campo jq é obrigatório",
+                    minlength: "O campo deve ter no minimo 10 caracteres"
+                },
+                curso: {
+                    required: "O campo jq é obrigatório",
+                    rangelength: "O campo deve ter no minimo 5 caracteres",
+                }
+            }
         })
 
-        addAluno()
+        var dados = $("input")
+
+        dadosSalvar = {
+            nome: dados[1].value,
+            curso: dados[2].value,
+            matricula: dados[3].value
+        }
+        console.log('dados pra salvar', dadosSalvar)
+
+        // fetch("http://localhost:3000/alunos", {method: "post", body: dadosSalvar}).then(function (res){
+        //     console.log('os dados foram salvos', res)
+        // })
+
+        // $.post("https://api-server-senac.herokuapp.com/alunos", dadosSalvar, function (result) {
+        //     console.log('os dados foram salvos', result)
+        //     cancelar()
+        //     listarDados()
+        // })
     }
 
-    $("#enviarForm").click(function () {
-        $.post("https://server-osito-json.herokuapp.com/posts",
-            {
-                "aluno": $("#nome").val(),
-                "idade": $("#idade").val(),
-                "curso": $("#curso").val(),
-                "matricula": $("#matricula").val()
-            });
-    });
 
-    function addAluno() {
-        $("#formCrud").show()
-        $("#pessoas").hide()
-        $("#btn-form").hide()
+    // Atualizar dados do aluno
+    function atualizarDados() {
+        var dados = $("input")
+
+        dadosSalvar = {
+            nome: dados[1].value,
+            curso: dados[2].value,
+            matricula: dados[3].value
+        }
+        console.log('dados pra salvar', dadosSalvar)
+
+        // fetch("http://localhost:3000/alunos", {method: "post", body: dadosSalvar}).then(function (res){
+        //     console.log('os dados foram salvos', res)
+        // })
+
+        $.ajax({
+            type: "PUT",
+            url: `https://api-server-senac.herokuapp.com/alunos/${dados[0].value}`,
+            data: dadosSalvar,
+            success: function (response) {
+                console.log("atualizado", response)
+                cancelar()
+                listarDados()
+            }
+        });
+
     }
 
-    function cancelar() {
-        $("#formCrud").hide()
-        $("#pessoas").show()
-        $("#btn-form").show()
+    function deletarAluno(id) {
+        $.ajax({
+            type: "DELETE",
+            url: `https://api-server-senac.herokuapp.com/alunos/${id}`,
+            success: function (response) {
+                console.log("deletado", response)
+                cancelar()
+                listarDados()
+            }
+        });
     }
 </script>

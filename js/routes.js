@@ -10,7 +10,6 @@ function mudaAluno() {
     $("#content").load("pages/nota-aluno.html");
     $(".sidenav-overlay").click();
 }
-
 function mudaPessoa() {
     $("#content").load("pages/pessoas.html");
     $(".sidenav-overlay").click();
